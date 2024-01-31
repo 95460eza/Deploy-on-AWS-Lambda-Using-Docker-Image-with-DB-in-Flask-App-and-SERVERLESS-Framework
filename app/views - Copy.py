@@ -202,19 +202,14 @@ def lambda_handler(event, context):
 
             # Call the Flask app with the translated environment
             with flask_web_app.request_context(env):
-                flask_web_app.preprocess_request()
-                try:
-                    response = flask_web_app.full_dispatch_request()
-                except Exception as e:
-                    response = flask_web_app.handle_exception(e)
+                response = flask_web_app.dispatch_request()
 
             # Return the response
             return {
-                'statusCode': response.status_code,
-                'body': response.get_data(as_text=True),
-                'headers': dict(response.headers),
+                'statusCode': 200,
+                'body': response
             }
-            
+
         except Exception as e:
 
             # Log the exception
