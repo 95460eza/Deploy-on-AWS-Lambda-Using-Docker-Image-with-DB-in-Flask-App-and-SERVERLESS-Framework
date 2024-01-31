@@ -207,8 +207,8 @@ def lambda_handler(event, context):
 
             # Return the response
             return {
-                'statusCode': 200
-                #'body': response,
+                'statusCode': 200,
+                'body': response
                 #'headers': dict(response.headers)
             }
 
