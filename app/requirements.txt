@@ -3,9 +3,8 @@
 flask
 numpy
 pillow
+requests
 #pandas
-#requests
-
 
 
 # For models.py

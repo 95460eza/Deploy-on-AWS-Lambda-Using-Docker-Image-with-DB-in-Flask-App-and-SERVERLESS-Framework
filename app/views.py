@@ -4,8 +4,9 @@ import os
 from flask import Flask
 from flask import render_template
 #from flask import send_from_directory
-from .models import db, Table_datasetphotos_names
-#import numpy as np
+from models import db, Table_datasetphotos_names
+#from .models import db, Table_datasetphotos_names
+import numpy as np
 import json
 import pickle
 import requests
@@ -165,19 +166,61 @@ app_ctx.pop()
 #if __name__ == '__main__':
 #    flask_web_app.run(host='0.0.0.0', port=8000, debug=True)
 
+
 # Always LAST statements of the file
-# Zappa requires the handler function to be named `lambda_handler`
+# AWS Lambda when used with the "SERVERLESS FRAMEWORK" EXPECTS to interfaces with WSGI (Web Server Gateway Interface) compatible applications. The Flask .wsgi_app() METHOD
+# returns a WSGI application as the correct interface type.
 def lambda_handler(event, context):
 
-    try:
+        try:
 
-        logging.info("Lambda Event: %s", event)
-        response = flask_web_app(event, context)
-        return response
+            # Create a WSGI-compatible environment from Lambda event
+            env = {
+                'wsgi.version': (1, 0),
+                'wsgi.input': event['body'],
+                'wsgi.url_scheme': 'https',
+                'REQUEST_METHOD': event['httpMethod'],
+                'SERVER_PROTOCOL': 'HTTP/1.1',
+                'HTTP_ACCEPT': event['headers'].get('Accept', ''),
+                'HTTP_ACCEPT_ENCODING': event['headers'].get('Accept-Encoding', ''),
+                'HTTP_USER_AGENT': event['headers'].get('User-Agent', ''),
+                'PATH_INFO': event['path'],
+                'QUERY_STRING': event['queryStringParameters'] or '',
+                'CONTENT_TYPE': event['headers'].get('Content-Type', ''),
+                'CONTENT_LENGTH': event['headers'].get('Content-Length', '0'),
+                'SERVER_NAME': event['requestContext']['domainName'],
+                'SERVER_PORT': '443',
+                'SCRIPT_NAME': '',
+                'wsgi.errors': None,  # You might want to set this to a log file or similar
+                'wsgi.multiprocess': False,
+                'wsgi.multithread': False,
+                'wsgi.run_once': False
+                # Add more headers as needed
+            }
 
-    except Exception as e:
+            # Log information
+            logging.info(f"AWS Lambda-generated ENVENT SUCESSFULLY PARSED: %s", event)
 
-        # Log the exception
-        logging.info("Lambda Event: %s", event)
-        logging.error("An error HAS occurred: %s", event)
-        logging.error("An error HAS occurred: %s", str(e))
+            # Call the Flask app with the translated environment
+            with flask_web_app.request_context(env):
+                response = flask_web_app.dispatch_request()
+
+            # Return the response
+            return {
+                'statusCode': response.status_code,
+                'body': response.get_data(),
+                'headers': dict(response.headers),
+            }
+
+        except Exception as e:
+
+            # Log the exception
+            logging.info("Lambda Event: %s", event)
+            logging.error("An error HAS occurred: %s", event)
+            logging.error("An error HAS occurred: %s", str(e))
+
+            # Handle exceptions and return an error response if needed
+            return {
+                'statusCode': 850,
+                'body': f'Error: {str(e)}'
+            }
