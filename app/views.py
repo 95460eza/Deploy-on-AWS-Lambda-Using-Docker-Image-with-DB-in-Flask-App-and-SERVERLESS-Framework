@@ -207,8 +207,9 @@ def lambda_handler(event, context):
 
             # Return the response
             return {
+                'statusCode': 200
                 #'body': response.get_data(),
-                'headers': dict(response.headers)
+                #'headers': dict(response.headers)
             }
 
         except Exception as e:
