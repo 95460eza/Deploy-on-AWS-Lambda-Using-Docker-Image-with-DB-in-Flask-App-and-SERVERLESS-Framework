@@ -1,8 +1,7 @@
 import logging
 import sys
 import os
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, render_template_string
 #from flask import send_from_directory
 from models import db, Table_datasetphotos_names
 #from .models import db, Table_datasetphotos_names
@@ -207,8 +206,8 @@ def lambda_handler(event, context):
 
             # Return the response
             return {
-                'statusCode': 400,
-                'body': response
+                'statusCode': 200,
+                'body': render_template_string(response)
                 #'headers': dict(response.headers)
             }
 
