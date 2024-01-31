@@ -207,7 +207,7 @@ def lambda_handler(event, context):
 
             # Return the response
             return {
-                'statusCode': response.status_code,
+                
                 'body': response.get_data(),
                 'headers': dict(response.headers),
             }
